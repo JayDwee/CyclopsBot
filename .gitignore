@@ -1,3 +1,8 @@
+# Current Config
+configs/config.ini
+# IDE info
+.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

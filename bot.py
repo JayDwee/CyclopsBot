@@ -14,6 +14,8 @@ ToDo
 import os
 import sys
 import configparser
+import shutil
+import time
 
 # Libs
 import discord
@@ -38,11 +40,22 @@ if not os.path.exists("./configs/config.ini"):
     sys.exit("No config found.")
 # Runs config file
 config = configparser.ConfigParser()
+try:
+    config.read(os.path.abspath("./configs/config.ini"))
+except FileNotFoundError:
+    try:
+        #shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
+        print("You need to set up the config file correctly.")
+    except shutil.Error:
+        print("Something is wrong with the default config file or the config folder.")
+        time.sleep(4)
 
+    sys.exit()
 
 # Constants
-COGS_DIR = "D:\Jack Draper\Documents\git.soton\Cyclops Bot\cogs"
-BOT_TOKEN = "NTkwNDUwMzU2NDgwMzc2ODM0.XQibrw.4-ONVb0PbGXRT8h4iyRRc6BDFxY"
+COGS_DIR = ".\cogs"
+ADMIN_ROLE = config["Credentials"]["admin_role"]
+BOT_TOKEN = config["Credentials"]["bot_token"]
 
 
 client = commands.Bot(command_prefix=".")
