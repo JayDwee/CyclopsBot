@@ -3,6 +3,8 @@
 """
 The main code to be ran for CyclopsBot
 
+Must be ran as admin/root
+
 Commented using reStructuredText (reST)
 
 ToDo
@@ -34,15 +36,18 @@ __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
 # "Prototype", "Development", or "Production"
 
+# Constants
+CONFIG_PATH = "./configs/config.ini"
+COGS_DIR = ".\cogs"
 
 # Checks for config file
-if not os.path.exists("./configs/config.ini"):
+if not os.path.exists(CONFIG_PATH):
     print("No config file can be found in ./configs/.")
     sys.exit("No config found.")
 # Runs config file
 config = configparser.ConfigParser()
 try:
-    config.read(os.path.abspath("./configs/config.ini"))
+    config.read(os.path.abspath(CONFIG_PATH))
 except FileNotFoundError:
     try:
         #shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
@@ -53,8 +58,7 @@ except FileNotFoundError:
 
     sys.exit()
 
-# Constants
-COGS_DIR = ".\cogs"
+# Config Constants
 ADMIN_ROLE = config["Credentials"]["admin_role"]
 BOT_TOKEN = config["Credentials"]["bot_token"]
 

@@ -16,6 +16,7 @@ import sys
 import configparser
 import shutil
 import time
+import codecs
 
 # Libs
 import discord
@@ -28,11 +29,18 @@ __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
 # "Prototype", "Development", or "Production"
+
+# Constants
+CONFIG_PATH = "./configs/config.ini"
+DEFAULT_EMBED = discord.Embed(
+            title=":desktop: Program Status",
+            colour=discord.Colour.blue()
+        )
 
 # Checks for config file
 if not os.path.exists("./configs/config.ini"):
@@ -41,24 +49,21 @@ if not os.path.exists("./configs/config.ini"):
 # Runs config file
 config = configparser.ConfigParser()
 try:
-    config.read(os.path.abspath("./configs/config.ini"))
+    # config.read(os.path.abspath("./configs/config.ini"))
+    config.read_file(codecs.open(CONFIG_PATH, "r", "utf8"))
 except FileNotFoundError:
     try:
-        #shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
+        # shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
         print("You need to set up the config file correctly.")
     except shutil.Error:
         print("Something is wrong with the default config file or the config folder.")
         time.sleep(4)
     sys.exit()
 
-# Constants
+# Config Constants
 ADMIN_ROLE = config["Credentials"]["admin_role"]
-TEXT_CHANNEL = eval(config["ProcessDisplay"]["text_channel_id"])
+TEXT_CHANNEL = int(config["ProcessDisplay"]["text_channel_id"])
 PROCESSES = eval(config["ProcessDisplay"]["processes"])
-DEFAULT_EMBED = discord.Embed(
-            title=":desktop: Program Status",
-            colour=discord.Colour.blue()
-        )
 
 
 class ProcessDisplay(commands.Cog):
@@ -101,19 +106,15 @@ class ProcessDisplay(commands.Cog):
         :param name: The name to be displayed for the process (e.g. 'Command Prompt')
         :return:
         """
-        if name[0] == ":":
-            name = "<"+name
+        name = self.fix_emoji_escapes(name)
         if process in PROCESSES.keys():
             await ctx.send(f"The process {process} is already being displayed")
-
         elif name in PROCESSES.values():
             await ctx.send(f"The process name {name} is already being displayed")
 
         else:
             PROCESSES[process] = name
-            config.set("ProcessDisplay", "processes", str(PROCESSES))
-            with open('./configs/config.ini', 'w') as configfile:
-                config.write(configfile)
+            self.update_processes_config()
             await ctx.send(f"The process {name} has been added")
 
     @commands.command()
@@ -126,13 +127,38 @@ class ProcessDisplay(commands.Cog):
         :param name: Name displayed for the process (e.g. Command Prompt)
         :return:
         """
+        name = self.fix_emoji_escapes(name)
+        complete = False
         for process in PROCESSES.keys():
             if PROCESSES.get(process) == name:
                 PROCESSES.pop(process)
-                config.set("ProcessDisplay", "processes", str(PROCESSES))
-                with open('./configs/config.ini', 'w') as configfile:
-                    config.write(configfile)
+                self.update_processes_config()
                 await ctx.send(f"The process {name} has been removed")
+                complete = True
+                break
+        if not complete:
+            await ctx.send(f"The process {name} doesn't exist")
+
+    @commands.command()
+    @commands.has_role(ADMIN_ROLE)
+    async def edit_process(self, ctx, old_name, new_name):
+        """
+
+        :param ctx:
+        :param old_name:
+        :param new_name:
+        :return:
+        """
+        old_name = self.fix_emoji_escapes(old_name)
+        new_name = self.fix_emoji_escapes(new_name)
+        if old_name in PROCESSES.values():
+            for process in PROCESSES:
+                if PROCESSES.get(process) == old_name:
+                    PROCESSES.update({process: new_name})
+                    self.update_processes_config()
+
+        else:
+            await ctx.send(f"Process name {old_name} doesn't exist")
 
     @tasks.loop(seconds=1)
     async def find_processes(self, msg):
@@ -153,9 +179,11 @@ class ProcessDisplay(commands.Cog):
 
         for process in PROCESSES:
             if process in running_processes:
-                new_embed.add_field(name=PROCESSES.get(process), value="Online :white_check_mark:")
+                new_embed.add_field(name=PROCESSES.get(process),
+                                    value="Online :white_check_mark:", inline=False)
             else:
-                new_embed.add_field(name=PROCESSES.get(process), value="Offline <:red_cross:590500648639004673>")
+                new_embed.add_field(name=PROCESSES.get(process),
+                                    value="Offline <:red_cross:590500648639004673>", inline=False)
 
         await msg.edit(content="", embed=new_embed)
 
@@ -174,6 +202,30 @@ class ProcessDisplay(commands.Cog):
         :return: the message that says how many messages were deleted
         """
         await channel.purge(limit=100, check=self.is_me)
+
+    @staticmethod
+    def update_processes_config():
+        """
+        Updates the processes line in the config with the current PROCESSES
+        :return:
+        """
+
+        config.set("ProcessDisplay", "processes", str(PROCESSES))
+        with open(CONFIG_PATH, 'w', encoding='utf-8') as configfile:
+            config.write(configfile)
+
+    @staticmethod
+    def fix_emoji_escapes(text):
+        """
+        Fixes emoji escapes to add the < back on
+        :param text: The text that needs to be checked for an escape
+        :return: the fixed text
+        """
+        new_text = text.split(":")
+        for i in range(2, len(new_text)):
+            if ">" in new_text[i]:
+                new_text[i-2] += "<"
+        return ":".join(new_text)
 
 
 def setup(client):
