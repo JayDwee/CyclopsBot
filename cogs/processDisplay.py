@@ -143,10 +143,10 @@ class ProcessDisplay(commands.Cog):
     @commands.has_role(ADMIN_ROLE)
     async def edit_process(self, ctx, old_name, new_name):
         """
-
-        :param ctx:
-        :param old_name:
-        :param new_name:
+        Edits the name of a process
+        :param ctx: The context of the command
+        :param old_name: The old name of the process (to be changed)
+        :param new_name: The new name of the process (changed to)
         :return:
         """
         old_name = self.fix_emoji_escapes(old_name)
