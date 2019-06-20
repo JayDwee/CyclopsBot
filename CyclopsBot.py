@@ -58,6 +58,7 @@ ADMIN_ROLE = config["Credentials"]["admin_role"]
 BOT_TOKEN = config["Credentials"]["bot_token"]
 
 
+os.system("title "+"Cyclops Bot")
 client = commands.Bot(command_prefix=".")
 
 
