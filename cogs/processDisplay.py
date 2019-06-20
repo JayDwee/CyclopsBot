@@ -144,8 +144,10 @@ class ProcessDisplay(commands.Cog):
         new_embed = DEFAULT_EMBED.copy()
 
         for proc in psutil.process_iter():
-            if proc.name() in PROCESSES.keys() or (proc.name() == "java.exe" and proc.cwd() in PROCESSES.keys):
+            if proc.name() in PROCESSES.keys():
                 running_processes.append(proc.name())
+            elif proc.cwd() in PROCESSES.keys():
+                running_processes.append(proc.cwd())
 
         for process in PROCESSES:
             if process in running_processes:
