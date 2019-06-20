@@ -146,7 +146,7 @@ class ProcessDisplay(commands.Cog):
         for proc in psutil.process_iter():
             if proc.name() in PROCESSES.keys():
                 running_processes.append(proc.name())
-            elif proc.cwd() in PROCESSES.keys():
+            elif proc.name() == "java.exe" and proc.cwd() in PROCESSES.keys():
                 running_processes.append(proc.cwd())
 
         for process in PROCESSES:
