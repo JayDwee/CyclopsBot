@@ -108,7 +108,7 @@ async def ping(ctx):
 
 
 @client.command()
-@commands.has_role('Founders')
+@commands.has_role(ADMIN_ROLE)
 async def clear(ctx, amount=2):
     """
     Clears a given number of messages from the given channel
@@ -120,7 +120,7 @@ async def clear(ctx, amount=2):
 
 
 @client.command()
-@commands.has_role('Founders')
+@commands.has_role(ADMIN_ROLE)
 async def load_cog(ctx, extension):
     """
     Loads a cog from the cogs folder
@@ -132,7 +132,7 @@ async def load_cog(ctx, extension):
 
 
 @client.command()
-@commands.has_role('Founders')
+@commands.has_role(ADMIN_ROLE)
 async def unload_cog(ctx, extension):
     """
     Unloads a running cog
