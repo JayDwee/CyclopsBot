@@ -77,7 +77,7 @@ async def on_ready():
     print("Bot is ready.")
 
 
-@client.commands
+@client.command()
 @commands.has_role(ADMIN_ROLE)
 async def change_activity(ctx, activity, name):
     """
