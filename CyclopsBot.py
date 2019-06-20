@@ -30,7 +30,7 @@ __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
@@ -76,6 +76,25 @@ async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you sleep"))
     print("Bot is ready.")
 
+
+@client.commands
+@commands.has_role(ADMIN_ROLE)
+async def change_activity(ctx, activity, name):
+    """
+    Allows admins to change the activity of the bot
+    :param ctx: Context of the command
+    :param activity: The new activity of the bot
+    :param name: The name of the activity
+    :return:
+    """
+    if str.lower(activity) == "watching":
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=name))
+        await ctx.send(f"I am now watching {name}")
+    elif str.lower(activity) == "playing":
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=name))
+        await ctx.send(f"I am now playing {name}")
+    else:
+        await ctx.send("That is not a valid activity, sorry!\nTry 'playing' or 'watching'")
 
 @client.event
 async def on_member_join(member):
