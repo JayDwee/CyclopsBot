@@ -7,6 +7,7 @@ Commented using reStructuredText (reST)
 
 ToDo
     create and use a database for multiple servers
+    server and clients where server responds saying the server is down if lost connection
 """
 # Futures
 

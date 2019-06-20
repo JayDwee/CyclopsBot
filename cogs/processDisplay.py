@@ -101,6 +101,8 @@ class ProcessDisplay(commands.Cog):
         :param name: The name to be displayed for the process (e.g. 'Command Prompt')
         :return:
         """
+        if name[0] == ":":
+            name = "<"+name
         if process in PROCESSES.keys():
             await ctx.send(f"The process {process} is already being displayed")
 
