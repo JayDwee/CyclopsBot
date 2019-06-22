@@ -29,7 +29,7 @@ __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
@@ -86,11 +86,14 @@ class ProcessDisplay(commands.Cog):
         starts up find_processes method
         :return:
         """
-        channel = self.client.get_channel(TEXT_CHANNEL)
+        started = False
+        if not started:
+            channel = self.client.get_channel(TEXT_CHANNEL)
 
-        await self.delete_bot_msg(channel)
-        msg = await channel.send(embed=DEFAULT_EMBED)
-        self.find_processes.start(msg)
+            await self.delete_bot_msg(channel)
+            msg = await channel.send(embed=DEFAULT_EMBED)
+            self.find_processes.start(msg)
+            started = True
         print("ProcessDisplay Running")
 
     # Commands

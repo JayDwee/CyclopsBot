@@ -24,13 +24,14 @@ import time
 import discord
 from discord.ext import commands, tasks
 
+
 # Own modules
 
 __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
@@ -73,7 +74,10 @@ async def on_ready():
     Ran after all cogs have been started and bot is ready
     :return:
     """
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you sleep"))
+    started = False
+    if not started:
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you sleep"))
+        started = True
     print("Bot is ready.")
 
 
@@ -96,6 +100,7 @@ async def change_activity(ctx, activity, name):
     else:
         await ctx.send("That is not a valid activity, sorry!\nTry 'playing' or 'watching'")
 
+
 @client.event
 async def on_member_join(member):
     """
@@ -103,7 +108,7 @@ async def on_member_join(member):
     :param member: Member that has joined
     :return:
     """
-    print(member+" has joined the server")
+    print(f"{member} has joined the server")
 
 
 @client.event
@@ -113,7 +118,7 @@ async def on_member_remove(member):
     :param member: Member that has left
     :return:
     """
-    print(member+"has left the server")
+    print(f"{member} has left the server")
 
 
 @client.command()
