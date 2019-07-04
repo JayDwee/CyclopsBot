@@ -19,6 +19,7 @@ import sys
 import configparser
 import shutil
 import time
+import codecs
 
 # Libs
 import discord
@@ -31,7 +32,7 @@ __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
@@ -41,6 +42,8 @@ __status__ = "Development"
 CONFIG_PATH = "./configs/config.ini"
 COGS_DIR = ".\cogs"
 
+started = False
+
 # Checks for config file
 if not os.path.exists(CONFIG_PATH):
     print("No config file can be found in ./configs/.")
@@ -48,7 +51,7 @@ if not os.path.exists(CONFIG_PATH):
 # Runs config file
 config = configparser.ConfigParser()
 try:
-    config.read(os.path.abspath(CONFIG_PATH))
+    config.read_file(codecs.open(CONFIG_PATH, "r", "utf-8-sig"))
 except FileNotFoundError:
     try:
         #shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
@@ -74,15 +77,16 @@ async def on_ready():
     Ran after all cogs have been started and bot is ready
     :return:
     """
-    started = False
+    global started
     if not started:
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you sleep"))
         started = True
     print("Bot is ready.")
 
 
+# ---------------------------------------------------------------------------------------------- To be set as owner only
 @client.command()
-@commands.has_role(ADMIN_ROLE)
+@commands.has_permissions(administrator=True)
 async def change_activity(ctx, activity, name):
     """
     Allows admins to change the activity of the bot
@@ -137,7 +141,7 @@ async def ping(ctx):
 
 
 @client.command()
-@commands.has_role(ADMIN_ROLE)
+@commands.has_permissions(administrator=True)
 async def clear(ctx, amount=2):
     """
     Clears a given number of messages from the given channel
@@ -149,7 +153,7 @@ async def clear(ctx, amount=2):
 
 
 @client.command()
-@commands.has_role(ADMIN_ROLE)
+@commands.is_owner()
 async def load_cog(ctx, extension):
     """
     Loads a cog from the cogs folder
@@ -161,7 +165,7 @@ async def load_cog(ctx, extension):
 
 
 @client.command()
-@commands.has_role(ADMIN_ROLE)
+@commands.is_owner()
 async def unload_cog(ctx, extension):
     """
     Unloads a running cog

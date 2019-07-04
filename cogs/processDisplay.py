@@ -29,7 +29,7 @@ __author__ = "Jack Draper"
 __copyright__ = "Unofficial Copyright 2019, CyclopsBot"
 __credits__ = ["Jack Draper"]
 __license__ = "Developer"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __maintainer__ = "Jack Draper"
 __email__ = "thejaydwee@gmail.com"
 __status__ = "Development"
@@ -42,6 +42,7 @@ DEFAULT_EMBED = discord.Embed(
             colour=discord.Colour.blue()
         )
 
+
 # Checks for config file
 if not os.path.exists("./configs/config.ini"):
     print("No config file can be found in ./configs/.")
@@ -50,7 +51,7 @@ if not os.path.exists("./configs/config.ini"):
 config = configparser.ConfigParser()
 try:
     # config.read(os.path.abspath("./configs/config.ini"))
-    config.read_file(codecs.open(CONFIG_PATH, "r", "utf8"))
+    config.read_file(codecs.open(CONFIG_PATH, "r", "utf-8-sig"))
 except FileNotFoundError:
     try:
         # shutil.copyfile("./configs/default_config.ini", "./configs/config.ini")
@@ -75,7 +76,9 @@ class ProcessDisplay(commands.Cog):
         """
         :param client: the bot client parsed in from the main program
         """
+        self.started = False
         self.client = client
+        self.inline = False
 
     # Events
     @commands.Cog.listener()
@@ -86,8 +89,8 @@ class ProcessDisplay(commands.Cog):
         starts up find_processes method
         :return:
         """
-        started = False
-        if not started:
+
+        if not self.started:
             channel = self.client.get_channel(TEXT_CHANNEL)
 
             await self.delete_bot_msg(channel)
@@ -98,7 +101,32 @@ class ProcessDisplay(commands.Cog):
 
     # Commands
     @commands.command()
-    @commands.has_role(ADMIN_ROLE)
+    @commands.has_permissions(administrator=True)
+    async def toggle_inline(self,ctx):
+        """
+        Toggles inline for process controls
+
+        :param ctx: The command Context
+        :return:
+        """
+        self.inline = not self.inline
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def move_process(self, direction, process_name):
+        """
+        need to make
+        :param direction:
+        :param process_name:
+        :return:
+        """
+        for i in range(len(PROCESSES)):
+            if PROCESSES[i] == process_name:
+                if direction.lower() == "up":
+                    pass
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
     async def add_process(self, ctx, process, name):
         """
         Adds a process to the process display.
@@ -121,8 +149,8 @@ class ProcessDisplay(commands.Cog):
             await ctx.send(f"The process {name} has been added")
 
     @commands.command()
-    @commands.has_role(ADMIN_ROLE)
-    async def remove_process(self, ctx, name):
+    @commands.has_permissions(administrator=True)
+    async def remove_process(self, ctx, *name):
         """
         Removes a process from the process display
 
@@ -130,7 +158,8 @@ class ProcessDisplay(commands.Cog):
         :param name: Name displayed for the process (e.g. Command Prompt)
         :return:
         """
-        name = self.fix_emoji_escapes(name)
+        print(name)
+        name = self.fix_emoji_escapes(" ".join(name))
         complete = False
         for process in PROCESSES.keys():
             if PROCESSES.get(process) == name:
@@ -143,7 +172,7 @@ class ProcessDisplay(commands.Cog):
             await ctx.send(f"The process {name} doesn't exist")
 
     @commands.command()
-    @commands.has_role(ADMIN_ROLE)
+    @commands.has_permissions(administrator=True)
     async def edit_process(self, ctx, old_name, new_name):
         """
         Edits the name of a process
@@ -177,17 +206,20 @@ class ProcessDisplay(commands.Cog):
         for proc in psutil.process_iter():
             if proc.name() in PROCESSES.keys():
                 running_processes.append(proc.name())
-            elif proc.name() == "java.exe" and proc.cwd() in PROCESSES.keys():
+            elif proc.name() in ["java.exe", "javaw.exe"] and proc.cwd() in PROCESSES.keys():
                 running_processes.append(proc.cwd())
 
         for process in PROCESSES:
-            if process in running_processes:
+            try:
+                if process in running_processes:
+                    new_embed.add_field(name=PROCESSES.get(process),
+                                        value="Online <:GreenTick:592083498534174721>", inline=self.inline)
+                else:
+                    new_embed.add_field(name=PROCESSES.get(process),
+                                        value="Offline <:RedCross:592082557961633877>", inline=self.inline)
+            except PermissionError:
                 new_embed.add_field(name=PROCESSES.get(process),
-                                    value="Online :white_check_mark:", inline=False)
-            else:
-                new_embed.add_field(name=PROCESSES.get(process),
-                                    value="Offline <:red_cross:590500648639004673>", inline=False)
-
+                                    value="Admin Required <:OrangeUnknown:592082676891123722>", inline=self.inline)
         await msg.edit(content="", embed=new_embed)
 
     def is_me(self, m):
