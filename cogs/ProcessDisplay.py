@@ -202,12 +202,15 @@ class ProcessDisplay(commands.Cog):
         """
         running_processes = []
         new_embed = DEFAULT_EMBED.copy()
+        try:
+            for proc in psutil.process_iter():
+                if proc.name() in PROCESSES.keys():
+                    running_processes.append(proc.name())
+                elif proc.name() in ["java.exe", "javaw.exe"] and proc.cwd() in PROCESSES.keys():
+                    running_processes.append(proc.cwd())
+        except:
+            pass
 
-        for proc in psutil.process_iter():
-            if proc.name() in PROCESSES.keys():
-                running_processes.append(proc.name())
-            elif proc.name() in ["java.exe", "javaw.exe"] and proc.cwd() in PROCESSES.keys():
-                running_processes.append(proc.cwd())
 
         for process in PROCESSES:
             try:
